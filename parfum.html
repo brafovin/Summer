@@ -69,16 +69,18 @@
       width: 100%;
     }
 
-    /* ── Bottle SVG ── */
+    /* ── Bottle image ── */
     .bottle-wrap {
       position: relative;
       flex-shrink: 0;
     }
-    .bottle-wrap svg {
+    .bottle-wrap img {
+      width: 340px;
+      height: auto;
       filter: drop-shadow(0 20px 40px rgba(200,100,100,0.25));
       transition: transform 0.4s ease;
     }
-    .bottle-wrap:hover svg { transform: translateY(-8px) rotate(1deg); }
+    .bottle-wrap:hover img { transform: translateY(-8px) rotate(1deg); }
 
     /* sparkle dots */
     .sparkle {
@@ -329,63 +331,7 @@
       <div class="sparkle"></div>
       <div class="sparkle"></div>
 
-      <svg width="220" height="360" viewBox="0 0 220 360" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Cap -->
-        <rect x="80" y="10" width="60" height="28" rx="10" fill="#F9E04B" stroke="#D4B800" stroke-width="1.5"/>
-        <!-- Cap shine -->
-        <rect x="86" y="14" width="24" height="8" rx="4" fill="rgba(255,255,255,0.5)"/>
-
-        <!-- Collar -->
-        <rect x="88" y="38" width="44" height="14" rx="5" fill="#D98E8E"/>
-
-        <!-- Neck -->
-        <rect x="96" y="50" width="28" height="20" rx="4" fill="#F4BFBF" stroke="#D98E8E" stroke-width="1"/>
-
-        <!-- Shoulder curve -->
-        <path d="M70 76 Q70 68 96 68 L124 68 Q150 68 150 76 L155 100 H65 Z"
-              fill="#FDE8E8" stroke="#D98E8E" stroke-width="1.2"/>
-
-        <!-- Main bottle body -->
-        <rect x="65" y="100" width="90" height="210" rx="14" fill="url(#bottleGrad)" stroke="#D98E8E" stroke-width="1.5"/>
-
-        <!-- Front label background -->
-        <rect x="74" y="118" width="72" height="140" rx="10" fill="rgba(255,255,255,0.55)"/>
-
-        <!-- Yellow label accent bar -->
-        <rect x="74" y="118" width="72" height="22" rx="10" fill="#F9E04B"/>
-        <rect x="74" y="132" width="72" height="8" fill="#F9E04B"/>
-
-        <!-- Label text lines (decorative) -->
-        <rect x="84" y="155" width="52" height="4" rx="2" fill="#D98E8E" opacity="0.7"/>
-        <rect x="90" y="166" width="40" height="3" rx="1.5" fill="#D98E8E" opacity="0.5"/>
-        <rect x="86" y="178" width="48" height="3" rx="1.5" fill="#ccc" opacity="0.5"/>
-
-        <!-- Flower motif (simplified) -->
-        <circle cx="110" cy="215" r="18" fill="rgba(249,224,75,0.25)"/>
-        <circle cx="110" cy="198" r="8" fill="#F9E04B" opacity="0.8"/>
-        <circle cx="125" cy="207" r="8" fill="#F9E04B" opacity="0.75"/>
-        <circle cx="120" cy="224" r="8" fill="#F9E04B" opacity="0.7"/>
-        <circle cx="100" cy="224" r="8" fill="#F9E04B" opacity="0.7"/>
-        <circle cx="95"  cy="207" r="8" fill="#F9E04B" opacity="0.75"/>
-        <circle cx="110" cy="215" r="9" fill="#F4BFBF"/>
-
-        <!-- Snowflake / cool freshness symbol -->
-        <text x="110" y="250" text-anchor="middle" font-size="20" fill="#a0d8ef" opacity="0.7">❄</text>
-
-        <!-- Bottom highlight -->
-        <ellipse cx="110" cy="306" rx="36" ry="6" fill="rgba(255,255,255,0.3)"/>
-
-        <!-- Glass reflection -->
-        <rect x="70" y="105" width="10" height="190" rx="5" fill="rgba(255,255,255,0.25)"/>
-
-        <defs>
-          <linearGradient id="bottleGrad" x1="65" y1="0" x2="155" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%"   stop-color="#F4BFBF"/>
-            <stop offset="40%"  stop-color="#FDE8E8"/>
-            <stop offset="100%" stop-color="#D98E8E"/>
-          </linearGradient>
-        </defs>
-      </svg>
+      <img src="parfum-bild.svg" alt="Frische Blüte Parfüm Flakon">
     </div>
 
     <!-- Product Info -->
