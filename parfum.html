@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frische Blüte – Parfüm</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ballet: #F4BFBF;
+      --ballet-light: #FDE8E8;
+      --ballet-dark: #D98E8E;
+      --yellow: #F9E04B;
+      --yellow-light: #FFF6C0;
+      --yellow-dark: #D4B800;
+      --text-dark: #3a2a2a;
+      --text-mid: #7a5a5a;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--ballet-light) 0%, var(--yellow-light) 100%);
+      min-height: 100vh;
+      font-family: 'Lato', sans-serif;
+      color: var(--text-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      padding: 28px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255,255,255,0.45);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(244,191,191,0.5);
+    }
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      letter-spacing: 5px;
+      color: var(--ballet-dark);
+    }
+    nav a {
+      text-decoration: none;
+      color: var(--text-mid);
+      margin-left: 28px;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--ballet-dark); }
+
+    /* ── Hero ── */
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      padding: 70px 48px 50px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    /* ── Bottle SVG ── */
+    .bottle-wrap {
+      position: relative;
+      flex-shrink: 0;
+    }
+    .bottle-wrap svg {
+      filter: drop-shadow(0 20px 40px rgba(200,100,100,0.25));
+      transition: transform 0.4s ease;
+    }
+    .bottle-wrap:hover svg { transform: translateY(-8px) rotate(1deg); }
+
+    /* sparkle dots */
+    .sparkle {
+      position: absolute;
+      border-radius: 50%;
+      animation: float 3s ease-in-out infinite;
+    }
+    .sparkle:nth-child(1){ width:12px;height:12px;background:var(--yellow);top:10%;left:-18px;animation-delay:0s; }
+    .sparkle:nth-child(2){ width:8px; height:8px; background:var(--ballet);top:60%;right:-14px;animation-delay:1s; }
+    .sparkle:nth-child(3){ width:6px; height:6px; background:var(--yellow-dark);bottom:15%;left:10px;animation-delay:1.7s; }
+
+    @keyframes float {
+      0%,100%{ transform:translateY(0) scale(1); opacity:0.8; }
+      50%    { transform:translateY(-10px) scale(1.2); opacity:1; }
+    }
+
+    /* ── Product info ── */
+    .info { max-width: 460px; }
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--ballet-dark);
+      background: rgba(244,191,191,0.3);
+      border: 1px solid var(--ballet-dark);
+      border-radius: 30px;
+      padding: 4px 14px;
+      margin-bottom: 18px;
+    }
+    .info h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.2rem;
+      line-height: 1.15;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+    .info h1 em {
+      font-style: italic;
+      color: var(--ballet-dark);
+    }
+    .subtitle {
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 28px;
+    }
+    .description {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--text-mid);
+      margin-bottom: 32px;
+    }
+
+    /* ── Scent pyramid ── */
+    .pyramid-title {
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 14px;
+    }
+    .pyramid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+    .pyramid-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pyramid-label {
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      width: 60px;
+      color: var(--ballet-dark);
+    }
+    .pyramid-notes {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .note-chip {
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 400;
+      letter-spacing: 1px;
+    }
+    .note-chip.top    { background: var(--yellow-light); border: 1px solid var(--yellow-dark); color: var(--text-dark); }
+    .note-chip.heart  { background: rgba(244,191,191,0.4); border: 1px solid var(--ballet-dark); color: var(--text-dark); }
+    .note-chip.base   { background: rgba(255,255,255,0.6); border: 1px solid var(--text-mid); color: var(--text-mid); }
+
+    /* ── CTA ── */
+    .cta-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .price {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      color: var(--text-dark);
+    }
+    .btn-primary {
+      padding: 14px 36px;
+      background: linear-gradient(135deg, var(--ballet-dark), #c06060);
+      color: #fff;
+      border: none;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 6px 20px rgba(200,100,100,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(200,100,100,0.4);
+    }
+    .btn-secondary {
+      padding: 14px 28px;
+      background: transparent;
+      color: var(--ballet-dark);
+      border: 1px solid var(--ballet-dark);
+      border-radius: 40px;
+      font-size: 0.85rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover { background: var(--ballet-dark); color: #fff; }
+
+    /* ── Size selector ── */
+    .sizes {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+    .size-btn {
+      padding: 6px 18px;
+      border-radius: 20px;
+      border: 1px solid var(--ballet);
+      background: transparent;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      color: var(--text-mid);
+      transition: all 0.2s;
+    }
+    .size-btn.active,
+    .size-btn:hover {
+      background: var(--ballet);
+      color: var(--text-dark);
+      border-color: var(--ballet-dark);
+    }
+
+    /* ── Scent story ── */
+    .story {
+      width: 100%;
+      max-width: 1100px;
+      padding: 60px 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 28px;
+    }
+    .story-card {
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 32px 28px;
+      border: 1px solid rgba(244,191,191,0.4);
+      transition: transform 0.25s;
+    }
+    .story-card:hover { transform: translateY(-6px); }
+    .story-icon { font-size: 2.2rem; margin-bottom: 16px; }
+    .story-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      color: var(--text-dark);
+    }
+    .story-card p {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-mid);
+    }
+
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 30px;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--text-mid);
+      border-top: 1px solid rgba(244,191,191,0.4);
+      margin-top: auto;
+    }
+
+    /* ── Yellow accent strip ── */
+    .accent-strip {
+      width: 100%;
+      background: var(--yellow);
+      padding: 14px 48px;
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      font-size: 0.72rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-dark);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">BLÜTENFRISCH</div>
+    <nav>
+      <a href="#">Düfte</a>
+      <a href="#">Über uns</a>
+      <a href="#">Stores</a>
+    </nav>
+  </header>
+
+  <!-- Yellow accent -->
+  <div class="accent-strip">
+    <span>✦ Neu 2025</span>
+    <span>Kostenloser Versand ab 60 €</span>
+    <span>✦ Nachhaltige Verpackung</span>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+
+    <!-- Perfume Bottle (SVG) -->
+    <div class="bottle-wrap">
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+      <div class="sparkle"></div>
+
+      <svg width="220" height="360" viewBox="0 0 220 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cap -->
+        <rect x="80" y="10" width="60" height="28" rx="10" fill="#F9E04B" stroke="#D4B800" stroke-width="1.5"/>
+        <!-- Cap shine -->
+        <rect x="86" y="14" width="24" height="8" rx="4" fill="rgba(255,255,255,0.5)"/>
+
+        <!-- Collar -->
+        <rect x="88" y="38" width="44" height="14" rx="5" fill="#D98E8E"/>
+
+        <!-- Neck -->
+        <rect x="96" y="50" width="28" height="20" rx="4" fill="#F4BFBF" stroke="#D98E8E" stroke-width="1"/>
+
+        <!-- Shoulder curve -->
+        <path d="M70 76 Q70 68 96 68 L124 68 Q150 68 150 76 L155 100 H65 Z"
+              fill="#FDE8E8" stroke="#D98E8E" stroke-width="1.2"/>
+
+        <!-- Main bottle body -->
+        <rect x="65" y="100" width="90" height="210" rx="14" fill="url(#bottleGrad)" stroke="#D98E8E" stroke-width="1.5"/>
+
+        <!-- Front label background -->
+        <rect x="74" y="118" width="72" height="140" rx="10" fill="rgba(255,255,255,0.55)"/>
+
+        <!-- Yellow label accent bar -->
+        <rect x="74" y="118" width="72" height="22" rx="10" fill="#F9E04B"/>
+        <rect x="74" y="132" width="72" height="8" fill="#F9E04B"/>
+
+        <!-- Label text lines (decorative) -->
+        <rect x="84" y="155" width="52" height="4" rx="2" fill="#D98E8E" opacity="0.7"/>
+        <rect x="90" y="166" width="40" height="3" rx="1.5" fill="#D98E8E" opacity="0.5"/>
+        <rect x="86" y="178" width="48" height="3" rx="1.5" fill="#ccc" opacity="0.5"/>
+
+        <!-- Flower motif (simplified) -->
+        <circle cx="110" cy="215" r="18" fill="rgba(249,224,75,0.25)"/>
+        <circle cx="110" cy="198" r="8" fill="#F9E04B" opacity="0.8"/>
+        <circle cx="125" cy="207" r="8" fill="#F9E04B" opacity="0.75"/>
+        <circle cx="120" cy="224" r="8" fill="#F9E04B" opacity="0.7"/>
+        <circle cx="100" cy="224" r="8" fill="#F9E04B" opacity="0.7"/>
+        <circle cx="95"  cy="207" r="8" fill="#F9E04B" opacity="0.75"/>
+        <circle cx="110" cy="215" r="9" fill="#F4BFBF"/>
+
+        <!-- Snowflake / cool freshness symbol -->
+        <text x="110" y="250" text-anchor="middle" font-size="20" fill="#a0d8ef" opacity="0.7">❄</text>
+
+        <!-- Bottom highlight -->
+        <ellipse cx="110" cy="306" rx="36" ry="6" fill="rgba(255,255,255,0.3)"/>
+
+        <!-- Glass reflection -->
+        <rect x="70" y="105" width="10" height="190" rx="5" fill="rgba(255,255,255,0.25)"/>
+
+        <defs>
+          <linearGradient id="bottleGrad" x1="65" y1="0" x2="155" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#F4BFBF"/>
+            <stop offset="40%"  stop-color="#FDE8E8"/>
+            <stop offset="100%" stop-color="#D98E8E"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Product Info -->
+    <div class="info">
+      <span class="tag">Eau de Parfum · Limitierte Edition</span>
+      <h1>Frische<br><em>Blüte</em></h1>
+      <p class="subtitle">Blüten &amp; Kühles Erwachen</p>
+      <p class="description">
+        Ein Duft zwischen zarten Blütenwiesen und dem frischen Moment, wenn man einen neuen
+        Kühlschrank öffnet – eine kühle, kristallklare Sauberkeit trifft auf warme Rosenblätter.
+        Lebendig, überraschend, unverwechselbar.
+      </p>
+
+      <!-- Scent pyramid -->
+      <p class="pyramid-title">Duftpyramide</p>
+      <div class="pyramid">
+        <div class="pyramid-row">
+          <span class="pyramid-label">Kopf</span>
+          <div class="pyramid-notes">
+            <span class="note-chip top">Zitronenblüte</span>
+            <span class="note-chip top">Kühle Luft</span>
+            <span class="note-chip top">Aldehydisch</span>
+          </div>
+        </div>
+        <div class="pyramid-row">
+          <span class="pyramid-label">Herz</span>
+          <div class="pyramid-notes">
+            <span class="note-chip heart">Rose</span>
+            <span class="note-chip heart">Pfingstrose</span>
+            <span class="note-chip heart">Jasmin</span>
+          </div>
+        </div>
+        <div class="pyramid-row">
+          <span class="pyramid-label">Basis</span>
+          <div class="pyramid-notes">
+            <span class="note-chip base">Weiße Moschuse</span>
+            <span class="note-chip base">Sandelholz</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Size selector -->
+      <div class="sizes">
+        <button class="size-btn">30 ml</button>
+        <button class="size-btn active">50 ml</button>
+        <button class="size-btn">100 ml</button>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta-row">
+        <span class="price">49,90 €</span>
+        <button class="btn-primary">In den Warenkorb</button>
+        <button class="btn-secondary">Probe</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story cards -->
+  <section class="story">
+    <div class="story-card">
+      <div class="story-icon">🌸</div>
+      <h3>Blütenherz</h3>
+      <p>Rose, Pfingstrose und Jasmin verweben sich zu einem romantischen, femininen Herz –
+         weich und sinnlich wie frisch gepflückte Blüten im Morgenwind.</p>
+    </div>
+    <div class="story-card">
+      <div class="story-icon">❄️</div>
+      <h3>Kühles Erwachen</h3>
+      <p>Der einzigartige Kopfton beschwört den frischen, klaren Moment eines neuen Beginns –
+         so rein wie der erste Atemzug aus einem neuen Kühlschrank.</p>
+    </div>
+    <div class="story-card">
+      <div class="story-icon">🎀</div>
+      <h3>Verpackung</h3>
+      <p>Das Flakon in Ballet-Pink und Sonnengelb – zart, verspielt und elegant.
+         Jedes Detail handgefertigt, die Schachtel aus 100 % recyceltem Karton.</p>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 BLÜTENFRISCH &nbsp;·&nbsp; Alle Rechte vorbehalten
+  </footer>
+
+  <script>
+    // Size button toggle
+    document.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const prices = { '30 ml': '34,90 €', '50 ml': '49,90 €', '100 ml': '74,90 €' };
+        document.querySelector('.price').textContent = prices[btn.textContent.trim()];
+      });
+    });
+  </script>
+</body>
+</html>
