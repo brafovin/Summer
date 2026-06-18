@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Rennspiel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: 'Courier New', monospace;
+      color: #fff;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 2rem;
+      color: #f0c040;
+      margin-bottom: 10px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px #f0c040;
+    }
+    #hud {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      color: #aef;
+    }
+    #hud span { font-weight: bold; color: #fff; }
+    canvas {
+      border: 3px solid #f0c040;
+      border-radius: 4px;
+      box-shadow: 0 0 30px #f0c04066;
+      display: block;
+    }
+    #controls {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: #888;
+      text-align: center;
+    }
+    #overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #000c;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    #overlay h2 { font-size: 2.5rem; color: #f0c040; margin-bottom: 20px; }
+    #overlay p  { font-size: 1rem; color: #aef; margin-bottom: 8px; }
+    #overlay button {
+      margin-top: 20px;
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      background: #f0c040;
+      color: #1a1a2e;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      letter-spacing: 2px;
+      transition: transform 0.1s;
+    }
+    #overlay button:hover { transform: scale(1.05); }
+    #overlay.hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>RENN AUTO</h1>
+  <div id="hud">
+    <div>PUNKTE: <span id="scoreDisplay">0</span></div>
+    <div>REKORD: <span id="bestDisplay">0</span></div>
+    <div>GESCHWINDIGKEIT: <span id="speedDisplay">0</span></div>
+    <div>LEBEN: <span id="livesDisplay">3</span></div>
+  </div>
+  <canvas id="canvas" width="480" height="600"></canvas>
+  <div id="controls">← → oder A D bewegen &nbsp;|&nbsp; Ausweiche den anderen Autos!</div>
+
+  <div id="overlay">
+    <h2 id="overlayTitle">RENN AUTO</h2>
+    <p id="overlayMsg">Steuere dein Auto und weiche den Gegnern aus!</p>
+    <p id="overlayScore"></p>
+    <button id="startBtn">STARTEN</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx    = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    const overlay      = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlayTitle');
+    const overlayMsg   = document.getElementById('overlayMsg');
+    const overlayScore = document.getElementById('overlayScore');
+    const startBtn     = document.getElementById('startBtn');
+    const scoreEl      = document.getElementById('scoreDisplay');
+    const bestEl       = document.getElementById('bestDisplay');
+    const speedEl      = document.getElementById('speedDisplay');
+    const livesEl      = document.getElementById('livesDisplay');
+
+    // --- Road layout ---
+    const LANE_COUNT = 3;
+    const ROAD_X     = 60;
+    const ROAD_W     = W - 120;
+    const LANE_W     = ROAD_W / LANE_COUNT;
+
+    function laneCenterX(lane) { return ROAD_X + lane * LANE_W + LANE_W / 2; }
+
+    // --- Car drawing ---
+    function drawCar(x, y, color, highlight, shadow, w, h) {
+      // Body
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.roundRect(x - w/2, y - h/2, w, h, 8);
+      ctx.fill();
+
+      // Roof
+      ctx.fillStyle = highlight;
+      ctx.beginPath();
+      ctx.roundRect(x - w*0.3, y - h*0.45, w*0.6, h*0.4, 5);
+      ctx.fill();
+
+      // Windshield
+      ctx.fillStyle = '#9ef6ff88';
+      ctx.beginPath();
+      ctx.roundRect(x - w*0.25, y - h*0.42, w*0.5, h*0.18, 3);
+      ctx.fill();
+
+      // Wheels
+      ctx.fillStyle = '#222';
+      const wy = h * 0.3;
+      const wx = w * 0.42;
+      const ww = w * 0.18, wh = h * 0.14;
+      for (const [dx, dy] of [[-wx,-wy],[-wx,wy],[wx,-wy],[wx,wy]]) {
+        ctx.beginPath();
+        ctx.roundRect(x+dx-ww/2, y+dy-wh/2, ww, wh, 3);
+        ctx.fill();
+      }
+
+      // Headlights / taillights
+      ctx.fillStyle = shadow;
+      ctx.beginPath();
+      ctx.roundRect(x - w*0.3, y + h*0.42, w*0.22, h*0.06, 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.roundRect(x + w*0.08, y + h*0.42, w*0.22, h*0.06, 2);
+      ctx.fill();
+    }
+
+    // --- Game state ---
+    let score, best = 0, lives, speed, frame;
+    let player, enemies, stripes, particles;
+    let keys = {};
+    let gameRunning = false;
+    let invincible = 0;
+
+    function initGame() {
+      score  = 0;
+      lives  = 3;
+      speed  = 4;
+      frame  = 0;
+      invincible = 0;
+
+      player = { x: laneCenterX(1), y: H - 90, lane: 1, targetX: laneCenterX(1), w: 40, h: 70 };
+      enemies  = [];
+      particles = [];
+
+      // Road stripes
+      stripes = [];
+      for (let i = 0; i < 8; i++) {
+        for (let lane = 0; lane < LANE_COUNT - 1; lane++) {
+          stripes.push({ x: ROAD_X + (lane+1)*LANE_W, y: i * 90, speed: 1 });
+        }
+      }
+    }
+
+    // --- Enemy spawn ---
+    const COLORS = [
+      ['#e74c3c','#c0392b','#7b241c'],
+      ['#2ecc71','#27ae60','#1a7a45'],
+      ['#3498db','#2980b9','#1c5a8a'],
+      ['#9b59b6','#8e44ad','#6c3483'],
+      ['#e67e22','#d35400','#943a00'],
+    ];
+
+    function spawnEnemy() {
+      const lane = Math.floor(Math.random() * LANE_COUNT);
+      const ci   = Math.floor(Math.random() * COLORS.length);
+      const [col, hi, sh] = COLORS[ci];
+      enemies.push({ x: laneCenterX(lane), y: -80, lane, w: 40, h: 70, col, hi, sh });
+    }
+
+    // --- Particles ---
+    function spawnParticles(x, y) {
+      for (let i = 0; i < 20; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const vel   = 1 + Math.random() * 4;
+        particles.push({
+          x, y,
+          vx: Math.cos(angle) * vel,
+          vy: Math.sin(angle) * vel,
+          life: 1,
+          color: ['#f0c040','#e74c3c','#fff'][Math.floor(Math.random()*3)]
+        });
+      }
+    }
+
+    // --- Input ---
+    document.addEventListener('keydown', e => {
+      keys[e.key] = true;
+      if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && player.lane > 0) {
+        player.lane--;
+        player.targetX = laneCenterX(player.lane);
+      }
+      if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && player.lane < LANE_COUNT - 1) {
+        player.lane++;
+        player.targetX = laneCenterX(player.lane);
+      }
+    });
+    document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+    // Mobile touch
+    let touchStartX = 0;
+    canvas.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    canvas.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 30) {
+        if (dx < 0 && player.lane > 0)              { player.lane--; player.targetX = laneCenterX(player.lane); }
+        if (dx > 0 && player.lane < LANE_COUNT - 1) { player.lane++; player.targetX = laneCenterX(player.lane); }
+      }
+    });
+
+    // --- Collision ---
+    function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+      return Math.abs(ax - bx) < (aw + bw) / 2 - 6
+          && Math.abs(ay - by) < (ah + bh) / 2 - 6;
+    }
+
+    // --- Stars background ---
+    const stars = Array.from({length:40}, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      r: Math.random() * 1.5 + 0.3,
+      speed: Math.random() * 0.5 + 0.2
+    }));
+
+    // --- Main loop ---
+    function update() {
+      frame++;
+      score += 1;
+      speed = 4 + Math.floor(score / 400) * 0.5;
+      if (speed > 14) speed = 14;
+      if (invincible > 0) invincible--;
+
+      // Smooth player movement
+      player.x += (player.targetX - player.x) * 0.25;
+
+      // Road stripes
+      stripes.forEach(s => {
+        s.y += speed;
+        if (s.y > H + 20) s.y -= 8 * 90;
+      });
+
+      // Stars
+      stars.forEach(s => {
+        s.y += s.speed;
+        if (s.y > H) s.y = 0;
+      });
+
+      // Spawn enemies
+      const spawnRate = Math.max(40, 90 - Math.floor(score / 300) * 5);
+      if (frame % spawnRate === 0) spawnEnemy();
+
+      // Move enemies
+      enemies.forEach(e => { e.y += speed * 1.1; });
+      enemies = enemies.filter(e => e.y < H + 100);
+
+      // Collision
+      if (invincible === 0) {
+        for (let i = enemies.length - 1; i >= 0; i--) {
+          const e = enemies[i];
+          if (rectsOverlap(player.x, player.y, player.w, player.h, e.x, e.y, e.w, e.h)) {
+            spawnParticles(e.x, e.y);
+            enemies.splice(i, 1);
+            lives--;
+            invincible = 120;
+            livesEl.textContent = lives;
+            if (lives <= 0) endGame();
+            break;
+          }
+        }
+      }
+
+      // Particles
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.15;
+        p.life -= 0.03;
+      });
+      particles = particles.filter(p => p.life > 0);
+
+      // HUD
+      scoreEl.textContent = score;
+      speedEl.textContent = Math.floor(speed * 20) + ' km/h';
+      if (score > best) { best = score; bestEl.textContent = best; }
+    }
+
+    function draw() {
+      // Sky
+      ctx.fillStyle = '#0d0d1a';
+      ctx.fillRect(0, 0, W, H);
+
+      // Stars
+      stars.forEach(s => {
+        ctx.fillStyle = '#ffffff88';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+        ctx.fill();
+      });
+
+      // Grass
+      ctx.fillStyle = '#1a3a1a';
+      ctx.fillRect(0, 0, ROAD_X, H);
+      ctx.fillRect(ROAD_X + ROAD_W, 0, W - ROAD_X - ROAD_W, H);
+
+      // Road
+      ctx.fillStyle = '#2c2c2c';
+      ctx.fillRect(ROAD_X, 0, ROAD_W, H);
+
+      // Road edges
+      ctx.strokeStyle = '#f0c040';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(ROAD_X, 0, ROAD_W, H);
+
+      // Lane dashes
+      stripes.forEach(s => {
+        ctx.fillStyle = '#fff5';
+        ctx.fillRect(s.x - 1.5, s.y, 3, 40);
+      });
+
+      // Particles
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4 * p.life, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      // Enemies
+      enemies.forEach(e => drawCar(e.x, e.y, e.col, e.hi, e.sh, e.w, e.h));
+
+      // Player (blink when invincible)
+      if (invincible === 0 || Math.floor(invincible / 8) % 2 === 0) {
+        drawCar(player.x, player.y, '#f0c040', '#ffe080', '#c0902a', player.w, player.h);
+      }
+
+      // Invincible shield glow
+      if (invincible > 0) {
+        ctx.strokeStyle = `rgba(255,200,50,${(invincible % 20) / 20})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.ellipse(player.x, player.y, player.w, player.h * 0.6, 0, 0, Math.PI*2);
+        ctx.stroke();
+      }
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+      initGame();
+      overlay.classList.add('hidden');
+      gameRunning = true;
+      requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      overlayTitle.textContent = 'GAME OVER';
+      overlayMsg.textContent   = 'Zu viele Kollisionen!';
+      overlayScore.textContent = `Punkte: ${score}   |   Rekord: ${best}`;
+      startBtn.textContent     = 'NOCHMAL';
+      overlay.classList.remove('hidden');
+    }
+
+    startBtn.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
